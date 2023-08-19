@@ -1,5 +1,31 @@
 .container {
     position: relative;
+    background-color: rgb(232, 158, 145);
+    background-image: radial-gradient(at 3% 10%, rgb(94, 207, 152) 0px, transparent 50%), radial-gradient(at 5% 94%, rgb(222, 125, 170) 0px, transparent 50%), radial-gradient(at 57% 7%, rgb(171, 123, 244) 0px, transparent 50%), radial-gradient(at 21% 7%, rgb(239, 235, 249) 0px, transparent 50%), radial-gradient(at 61% 72%, rgb(236, 172, 204) 0px, transparent 50%), radial-gradient(at 24% 38%, rgb(15, 240, 176) 0px, transparent 50%), radial-gradient(at 80% 65%, rgb(239, 205, 226) 0px, transparent 50%);
+    padding: 2em;
+    height: 100dvh;
+    overflow-y: scroll;
+}
+
+.container::-webkit-scrollbar {
+    width: 5px;
+    height: 1px;
+}
+
+/* Track */
+.container::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+/* Handle */
+.container::-webkit-scrollbar-thumb {
+    background: rgb(255, 255, 255);
+}
+
+/* Handle on hover */
+.container::-webkit-scrollbar-thumb:hover {
+    background: rgb(0, 225, 255);
+
 }
 
 .svgcontainer {
@@ -11,10 +37,20 @@
     justify-content: center;
 }
 
-.svgitem img {
-    width: 64px;
-    height: 64px;
+.svgitem {
+    background: linear-gradient(140deg, #141414, #232323);
+    border-radius: 15px;
+    display: flex;
+    box-shadow: 0 0 7px 0px #1b1b1b;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+}
+
+.svgitem:active {
+    background: #2c2c2c;
+    padding: 1em;
+    border-radius: 15px;
 }
 
 .popup {
@@ -47,7 +83,7 @@
     position: fixed;
     top: 10px;
     right: 10px;
-    background: #fff;
+    background: #ffffff;
     box-shadow: 0 0 4px 0 #eaeaea;
     color: #000;
 }

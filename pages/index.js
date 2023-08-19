@@ -1,57 +1,55 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import styles from '@/styles/Home.module.css';
 
-const SvgLoader = () => {
-  const [svgData, setSvgData] = useState([]);
-  const [search, setSearch] = useState('');
-  const [displayedSvgData, setDisplayedSvgData] = useState([]);
-  const [loadIndex, setLoadIndex] = useState(0);
-  const svgPerPage = 150;
-
-  const loadMoreButtonRef = useRef(null);
+export default function Test() {
+  const [gridData, setGridData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const x = 50; // Replace with your desired coordinates
+  const y = 50;
 
   useEffect(() => {
-    // Fetch the JSON data (assuming svgList.json is in the public folder)
-    fetch('/svgList.json')
-      .then((response) => response.json())
-      .then((data) => {
-        setSvgData(data);
-        // Initial load of 200 SVGs
-        setDisplayedSvgData(data.slice(0, svgPerPage));
-        setLoadIndex(svgPerPage);
-      });
-  }, []);
-
-  useEffect(() => {
-    const loadMoreObserver = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && loadIndex < svgData.length) {
-          loadMore();
-        }
-      },
-      { rootMargin: '0px', threshold: 0.7 }
-    );
-
-    if (loadMoreButtonRef.current) {
-      loadMoreObserver.observe(loadMoreButtonRef.current);
+    async function fetchGridData() {
+      try {
+        const grid = await fetch('/svgGridData.json');
+        const gridCoordsData = await grid.json();
+        setGridData(gridCoordsData);
+      } catch (error) {
+        console.error('Error fetching grid data:', error);
+      }
     }
 
-    return () => {
-      if (loadMoreButtonRef.current) {
-        loadMoreObserver.unobserve(loadMoreButtonRef.current);
+    fetchGridData();
+  }, []);
+
+  function selectItemByCoords(x, y) {
+    for (const item of gridData) {
+      if (
+        x >= item.x &&
+        x <= item.x + item.width && // Assuming each item has a width property
+        y >= item.y &&
+        y <= item.y + item.height // Assuming each item has a height property
+      ) {
+        return item.fileName;
       }
-    };
-  }, [loadIndex, svgData]);
+    }
+    return null;
+  }
 
-  const loadMore = () => {
-    const newSvgData = svgData.slice(loadIndex, loadIndex + svgPerPage);
-    setDisplayedSvgData((prevData) => [...prevData, ...newSvgData]);
-    setLoadIndex(loadIndex + svgPerPage);
-  };
+  const selectedSvg = selectItemByCoords(x, y);
 
-  // Filter the displayed SVGs based on the search input
-  const filteredSvgData = displayedSvgData.filter((svgName) =>
-    svgName.toLowerCase().includes(search.toLowerCase())
+  async function Download(photo, itemname) {
+    const img = await fetch(photo);
+    const blob = await img.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = itemname;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const filteredGridData = gridData.filter((item) =>
+    item.fileName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -59,27 +57,34 @@ const SvgLoader = () => {
       <input
         type='text'
         placeholder='Search SVGs...'
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
         className={styles.searchinput}
       />
       <div className={styles.svgcontainer}>
-        {filteredSvgData.map((svgName, index) => (
-          <div key={index} className={styles.svgitem}>
-            <a download href={`/round/${svgName}`}>
-              <img src={`/round/${svgName}`} alt={svgName} />
-            </a>
+        {filteredGridData.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              width: `64px`, // Adjust as needed
+              height: `64px`, // Adjust as needed
+              border: selectedSvg === item.fileName ? '2px solid red' : 'none', // Highlight selected item
+            }}
+            onClick={() => Download(`/round/${item.fileName}`, item.fileName)}
+            className={styles.svgitem}
+          >
+            <div
+              className="emoji-icon" // Replace with your CSS class for the icon
+              title={item.fileName} // Replace with your title
+              style={{
+                backgroundImage: `url(/svgGrid.png)`, // Change the source to your actual image URL
+                backgroundPosition: `-${item.x}px -${item.y}px`, // Crop the image
+                width: `48px`, // Set the icon width
+                height: `48px`, // Set the icon height
+              }}
+            />
           </div>
         ))}
       </div>
-      <button
-        ref={loadMoreButtonRef}
-        onClick={loadMore}
-        disabled={loadIndex >= svgData.length}
-      >
-        Load More
-      </button>
     </div>
   );
-};
-
-export default SvgLoader;
+}
